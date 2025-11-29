@@ -3,8 +3,8 @@ import ThemeRegistry from "@/components/ThemeRegistry";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Google Forms Clone",
-  description: "Pixel-perfect Google Forms clone",
+  title: "Better Google Forms",
+  description: "Better Google Forms",
 };
 
 export default function RootLayout({

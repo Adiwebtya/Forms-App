@@ -6,7 +6,7 @@ import api from '@/lib/api';
 import {
     AppBar, Toolbar, Typography, IconButton, Tabs, Tab, Box, Container,
     Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    CircularProgress, Button, Grid
+    CircularProgress, Button
 } from '@mui/material';
 import {
     ArrowBack as ArrowBackIcon,
@@ -39,7 +39,8 @@ export default function FormDetailsPage() {
     const [form, setForm] = useState<Form | null>(null);
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [loading, setLoading] = useState(true);
-    const [tabValue, setTabValue] = useState(1); // Default to Responses for this view
+    const [tabValue, setTabValue] = useState(1);
+    const [origin, setOrigin] = useState('');
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -49,6 +50,10 @@ export default function FormDetailsPage() {
             fetchData();
         }
     }, [id, router]);
+
+    useEffect(() => {
+        setOrigin(window.location.origin);
+    }, []);
 
     const fetchData = async () => {
         try {
@@ -72,12 +77,6 @@ export default function FormDetailsPage() {
     );
 
     if (!form) return <Typography>Form not found</Typography>;
-
-    const [origin, setOrigin] = useState('');
-
-    useEffect(() => {
-        setOrigin(window.location.origin);
-    }, []);
 
     const publicLink = `${origin}/form/${form._id}`;
 
@@ -153,9 +152,9 @@ export default function FormDetailsPage() {
                                                 {new Date(sub.submittedAt).toLocaleString()}
                                             </TableCell>
                                             <TableCell>
-                                                <Grid container spacing={2}>
+                                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                                                     {Object.entries(sub.content).map(([key, value]) => (
-                                                        <Grid item xs={12} key={key}>
+                                                        <Box key={key}>
                                                             <Typography variant="caption" display="block" color="text.secondary" sx={{ fontWeight: 500 }}>
                                                                 {key}
                                                             </Typography>
@@ -177,9 +176,9 @@ export default function FormDetailsPage() {
                                                                     {String(value)}
                                                                 </Typography>
                                                             )}
-                                                        </Grid>
+                                                        </Box>
                                                     ))}
-                                                </Grid>
+                                                </Box>
                                             </TableCell>
                                         </TableRow>
                                     ))}

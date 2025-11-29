@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import {
-    AppBar, Toolbar, Typography, Button, Container, Grid, Card, CardContent,
+    AppBar, Toolbar, Typography, Button, Container, Card, CardContent,
     TextField, IconButton, Fab, Tabs, Tab, Box, Paper, Menu, MenuItem,
-    CircularProgress, Divider
+    CircularProgress, Divider, Grid
 } from '@mui/material';
 import {
     Add as AddIcon,
@@ -107,7 +107,7 @@ export default function Dashboard() {
                 </Toolbar>
             </AppBar>
 
-            {/* Generator Section (Custom Addition to replicate "Start a new form") */}
+            {/* Generator Section */}
             <Box sx={{ bgcolor: 'white', py: 3, mb: 4 }}>
                 <Container maxWidth="lg">
                     <Typography variant="body1" sx={{ mb: 2, color: '#202124', fontWeight: 500 }}>
@@ -141,37 +141,35 @@ export default function Dashboard() {
                     Recent forms
                 </Typography>
 
-                <Grid container spacing={3}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 3 }}>
                     {forms.map((form) => (
-                        <Grid item xs={12} sm={6} md={4} lg={3} key={form._id}>
-                            <Card
-                                sx={{
-                                    height: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    cursor: 'pointer',
-                                    '&:hover': { border: '1px solid #673ab7' }
-                                }}
-                                onClick={() => router.push(`/dashboard/forms/${form._id}`)}
-                            >
-                                <Box sx={{ height: 150, bgcolor: '#f0ebf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <DescriptionIcon sx={{ fontSize: 60, color: '#673ab7', opacity: 0.5 }} />
-                                </Box>
-                                <CardContent sx={{ flexGrow: 1, pb: 1 }}>
-                                    <Typography gutterBottom variant="body1" component="div" sx={{ fontWeight: 500 }}>
-                                        {form.title}
+                        <Card
+                            sx={{
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                cursor: 'pointer',
+                                '&:hover': { border: '1px solid #673ab7' }
+                            }}
+                            onClick={() => router.push(`/dashboard/forms/${form._id}`)}
+                        >
+                            <Box sx={{ height: 150, bgcolor: '#f0ebf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <DescriptionIcon sx={{ fontSize: 60, color: '#673ab7', opacity: 0.5 }} />
+                            </Box>
+                            <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+                                <Typography gutterBottom variant="body1" component="div" sx={{ fontWeight: 500 }}>
+                                    {form.title}
+                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                                    <DescriptionIcon sx={{ fontSize: 16, color: '#673ab7', mr: 1 }} />
+                                    <Typography variant="caption" color="text.secondary">
+                                        Opened {new Date(form.createdAt).toLocaleDateString()}
                                     </Typography>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                                        <DescriptionIcon sx={{ fontSize: 16, color: '#673ab7', mr: 1 }} />
-                                        <Typography variant="caption" color="text.secondary">
-                                            Opened {new Date(form.createdAt).toLocaleDateString()}
-                                        </Typography>
-                                    </Box>
-                                </CardContent>
-                            </Card>
-                        </Grid>
+                                </Box>
+                            </CardContent>
+                        </Card>
                     ))}
-                </Grid>
+                </Box>
             </Container>
         </Box>
     );
