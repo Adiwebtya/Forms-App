@@ -24,7 +24,7 @@ export const generateFormSchema = async (prompt: string, context: string = ''): 
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const systemPrompt = `
     You are an AI that generates JSON schemas for forms based on natural language descriptions.
@@ -38,7 +38,7 @@ export const generateFormSchema = async (prompt: string, context: string = ''): 
         {
           "name": "fieldName",
           "label": "Field Label",
-          "type": "text|email|number|textarea|checkbox|select",
+          "type": "text|email|number|textarea|checkbox|select|file|date",
           "required": boolean,
           "options": ["option1", "option2"] // Only for select type
         }

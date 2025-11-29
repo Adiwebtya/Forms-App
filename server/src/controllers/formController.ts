@@ -145,3 +145,22 @@ export const submitResponse = async (req: Request, res: Response): Promise<void>
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+export const getSubmissions = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const userId = req.userId;
+
+        const form = await Form.findOne({ _id: id, userId });
+        if (!form) {
+            res.status(404).json({ message: 'Form not found or unauthorized' });
+            return;
+        }
+
+        const submissions = await ResponseModel.find({ formId: id }).sort({ submittedAt: -1 });
+        res.json(submissions);
+    } catch (error) {
+        console.error('Get submissions error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

@@ -106,16 +106,48 @@ export default function PublicFormPage() {
                                     {...register(field.name, { required: field.required })}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
+                                    <option value="">Select an option</option>
+                                    {field.options?.map((opt) => (
+                                        <option key={opt} value={opt}>{opt}</option>
+                                    ))}
+                                </select>
+                            ) : field.type === 'checkbox' ? (
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        {...register(field.name, { required: field.required })}
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                    />
+                                    <span className="ml-2 text-sm text-gray-600">Yes</span>
+                                </div>
+                            ) : field.type === 'file' ? (
+                                <input
+                                    type="file"
+                                    onChange={(e) => handleFileUpload(e, field.name)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            ) : (
+                                <input
+                                    type={field.type}
+                                    {...register(field.name, { required: field.required })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            )}
+
+                            {errors[field.name] && (
+                                <p className="text-red-500 text-xs mt-1">This field is required</p>
+                            )}
+                        </div>
                     ))}
 
-                                    <button
-                                        type="submit"
-                                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                    >
-                                        Submit Response
-                                    </button>
-                                </form>
+                    <button
+                        type="submit"
+                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                        Submit Response
+                    </button>
+                </form>
             </div>
         </div>
-            );
+    );
 }
