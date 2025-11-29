@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import Form from '../models/Form.js';
+import ResponseModel from '../models/Response.js';
 import { generateFormSchema, generateEmbedding } from '../lib/gemini.js';
 import { z } from 'zod';
 
@@ -100,6 +101,47 @@ export const getForms = async (req: AuthRequest, res: Response): Promise<void> =
         res.json(forms);
     } catch (error) {
         console.error('Get forms error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export const getFormById = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const form = await Form.findById(id);
+
+        if (!form) {
+            res.status(404).json({ message: 'Form not found' });
+            return;
+        }
+
+        res.json(form);
+    } catch (error) {
+        console.error('Get form by ID error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export const submitResponse = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const content = req.body;
+
+        const form = await Form.findById(id);
+        if (!form) {
+            res.status(404).json({ message: 'Form not found' });
+            return;
+        }
+
+        const response = new ResponseModel({
+            formId: id,
+            content,
+        });
+
+        await response.save();
+        res.status(201).json({ message: 'Response submitted successfully' });
+    } catch (error) {
+        console.error('Submit response error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
