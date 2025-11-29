@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import formRoutes from './routes/forms.js';
+import uploadRoutes from './routes/upload.js';
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/forms', formRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Database connection
 console.log('Connecting to MongoDB at:', process.env.MONGODB_URI);
