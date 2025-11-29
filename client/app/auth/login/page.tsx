@@ -7,6 +7,10 @@ import { z } from 'zod';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import {
+    Box, Container, Paper, Typography, TextField, Button, Alert
+} from '@mui/material';
+import { Description as DescriptionIcon } from '@mui/icons-material';
 
 const loginSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -37,53 +41,72 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8">
-                <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f0ebf8' }}>
+            <Container maxWidth="sm">
+                <Paper sx={{ p: 4, borderTop: '8px solid #673ab7' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 3 }}>
+                        <DescriptionIcon sx={{ fontSize: 40, color: '#673ab7', mr: 1 }} />
+                        <Typography variant="h4" sx={{ color: '#202124', fontWeight: 500 }}>
+                            Forms
+                        </Typography>
+                    </Box>
+
+                    <Typography variant="h5" align="center" gutterBottom sx={{ mb: 3, color: '#202124' }}>
                         Sign in to your account
-                    </h2>
-                </div>
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-                    <div className="rounded-md shadow-sm -space-y-px">
-                        <div>
-                            <input
-                                {...register('email')}
-                                type="email"
-                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Email address"
-                            />
-                            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
-                        </div>
-                        <div>
-                            <input
-                                {...register('password')}
-                                type="password"
-                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Password"
-                            />
-                            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
-                        </div>
-                    </div>
+                    </Typography>
 
-                    {error && <div className="text-red-500 text-sm text-center">{error}</div>}
+                    <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 2 }}>
+                        <TextField
+                            {...register('email')}
+                            fullWidth
+                            label="Email address"
+                            type="email"
+                            error={!!errors.email}
+                            helperText={errors.email?.message}
+                            sx={{ mb: 2 }}
+                        />
 
-                    <div>
-                        <button
+                        <TextField
+                            {...register('password')}
+                            fullWidth
+                            label="Password"
+                            type="password"
+                            error={!!errors.password}
+                            helperText={errors.password?.message}
+                            sx={{ mb: 2 }}
+                        />
+
+                        {error && (
+                            <Alert severity="error" sx={{ mb: 2 }}>
+                                {error}
+                            </Alert>
+                        )}
+
+                        <Button
                             type="submit"
+                            fullWidth
+                            variant="contained"
                             disabled={isSubmitting}
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                            sx={{
+                                py: 1.5,
+                                bgcolor: '#673ab7',
+                                '&:hover': { bgcolor: '#5e35b1' },
+                                mb: 2
+                            }}
                         >
                             {isSubmitting ? 'Signing in...' : 'Sign in'}
-                        </button>
-                    </div>
-                    <div className="text-center text-sm">
-                        <Link href="/auth/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-                            Don't have an account? Sign up
-                        </Link>
-                    </div>
-                </form>
-            </div>
-        </div>
+                        </Button>
+
+                        <Box sx={{ textAlign: 'center' }}>
+                            <Link href="/auth/signup" style={{ textDecoration: 'none' }}>
+                                <Typography sx={{ color: '#673ab7', '&:hover': { textDecoration: 'underline' } }}>
+                                    Don't have an account? Sign up
+                                </Typography>
+                            </Link>
+                        </Box>
+                    </Box>
+                </Paper>
+            </Container>
+        </Box>
     );
 }
