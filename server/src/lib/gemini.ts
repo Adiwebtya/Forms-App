@@ -1,6 +1,23 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export const generateFormSchema = async (prompt: string): Promise<any> => {
+export const generateEmbedding = async (text: string): Promise<number[]> => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY is not configured');
+  }
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
+
+  try {
+    const result = await model.embedContent(text);
+    return result.embedding.values;
+  } catch (error) {
+    console.error('Gemini Embedding Error:', error);
+    throw new Error('Failed to generate embedding');
+  }
+};
+
+export const generateFormSchema = async (prompt: string, context: string = ''): Promise<any> => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY is not configured');
@@ -29,7 +46,11 @@ export const generateFormSchema = async (prompt: string): Promise<any> => {
     }
   `;
 
-  const fullPrompt = `${systemPrompt}\n\nUser Request: ${prompt}`;
+  let fullPrompt = `${systemPrompt}\n\nUser Request: ${prompt}`;
+
+  if (context) {
+    fullPrompt += `\n\nRelevant Past Forms (Context):\n${context}\n\nUse the structure and style of these past forms if relevant, but prioritize the new request.`;
+  }
 
   try {
     const result = await model.generateContent(fullPrompt);

@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import Form from '../models/Form.js';
-import { generateFormSchema } from '../lib/gemini.js';
+import { generateFormSchema, generateEmbedding } from '../lib/gemini.js';
 import { z } from 'zod';
 
 interface AuthRequest extends Request {
@@ -21,14 +21,58 @@ export const generateForm = async (req: AuthRequest, res: Response): Promise<voi
             return;
         }
 
-        // Call AI to generate schema
-        const schema = await generateFormSchema(prompt);
+        // 1. Generate embedding for the new prompt
+        const promptEmbedding = await generateEmbedding(prompt);
 
-        // Save to database
+        // 2. Search for relevant past forms (Vector Search)
+        // Note: This requires an Atlas Vector Search Index named "vector_index"
+        let context = '';
+        try {
+            const similarForms = await Form.aggregate([
+                {
+                    $vectorSearch: {
+                        index: "vector_index",
+                        path: "embedding",
+                        queryVector: promptEmbedding,
+                        numCandidates: 100,
+                        limit: 3,
+                        filter: { userId: { $eq: userId } } // Ensure we only search user's own forms
+                    }
+                },
+                {
+                    $project: {
+                        title: 1,
+                        description: 1,
+                        content: 1,
+                        score: { $meta: "vectorSearchScore" }
+                    }
+                }
+            ]);
+
+            if (similarForms.length > 0) {
+                context = similarForms.map(f =>
+                    `Title: ${f.title}\nDescription: ${f.content.description}\nFields: ${JSON.stringify(f.content.fields)}`
+                ).join('\n---\n');
+                console.log('Found similar forms:', similarForms.map(f => f.title));
+            }
+        } catch (err) {
+            console.warn('Vector search failed (likely no index yet):', err);
+            // Continue without context if vector search fails
+        }
+
+        // 3. Generate Schema with Context
+        const schema = await generateFormSchema(prompt, context);
+
+        // 4. Generate summary embedding for the NEW form
+        const summaryText = `Title: ${schema.title}\nDescription: ${schema.description}\nFields: ${JSON.stringify(schema.fields)}`;
+        const newFormEmbedding = await generateEmbedding(summaryText);
+
+        // 5. Save to database
         const form = new Form({
             userId,
             title: schema.title || 'Untitled Form',
             content: schema,
+            embedding: newFormEmbedding
         });
 
         await form.save();
