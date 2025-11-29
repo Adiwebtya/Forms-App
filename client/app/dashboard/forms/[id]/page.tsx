@@ -3,7 +3,18 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import api from '@/lib/api';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import {
+    AppBar, Toolbar, Typography, IconButton, Tabs, Tab, Box, Container,
+    Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    CircularProgress, Button, Grid
+} from '@mui/material';
+import {
+    ArrowBack as ArrowBackIcon,
+    MoreVert as MoreVertIcon,
+    Visibility as VisibilityIcon,
+    Send as SendIcon,
+    ContentCopy as ContentCopyIcon
+} from '@mui/icons-material';
 
 interface Submission {
     _id: string;
@@ -28,6 +39,7 @@ export default function FormDetailsPage() {
     const [form, setForm] = useState<Form | null>(null);
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [loading, setLoading] = useState(true);
+    const [tabValue, setTabValue] = useState(1); // Default to Responses for this view
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -53,90 +65,124 @@ export default function FormDetailsPage() {
         }
     };
 
-    if (loading) return <div className="p-8 text-center">Loading details...</div>;
-    if (!form) return <div className="p-8 text-center text-red-500">Form not found</div>;
+    if (loading) return (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+            <CircularProgress />
+        </Box>
+    );
+
+    if (!form) return <Typography>Form not found</Typography>;
 
     const publicLink = `http://localhost:3000/form/${form._id}`;
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <nav className="bg-white shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <button onClick={() => router.push('/dashboard')} className="mr-4 text-gray-600 hover:text-gray-900">
-                                <ArrowLeft className="h-5 w-5" />
-                            </button>
-                            <h1 className="text-xl font-bold text-gray-900">{form.title}</h1>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+        <Box sx={{ bgcolor: '#f0ebf8', minHeight: '100vh' }}>
+            {/* Header */}
+            <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', color: 'text.primary', borderBottom: '1px solid #e0e0e0' }}>
+                <Toolbar>
+                    <IconButton edge="start" color="inherit" onClick={() => router.push('/dashboard')} sx={{ mr: 2 }}>
+                        <ArrowBackIcon sx={{ color: '#5f6368' }} />
+                    </IconButton>
+                    <Typography variant="h6" sx={{ flexGrow: 1, color: '#202124' }}>
+                        {form.title}
+                    </Typography>
 
-            <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                {/* Info Card */}
-                <div className="bg-white p-6 rounded-lg shadow-sm mb-8">
-                    <p className="text-gray-600 mb-4">{form.content.description}</p>
-                    <div className="flex items-center text-sm text-blue-600">
-                        <span className="font-medium mr-2">Public Link:</span>
-                        <a href={publicLink} target="_blank" rel="noopener noreferrer" className="flex items-center hover:underline">
-                            {publicLink}
-                            <ExternalLink className="h-4 w-4 ml-1" />
-                        </a>
-                    </div>
-                </div>
+                    <IconButton onClick={() => window.open(publicLink, '_blank')}>
+                        <VisibilityIcon sx={{ color: '#5f6368' }} />
+                    </IconButton>
+                    <Button
+                        variant="contained"
+                        startIcon={<SendIcon />}
+                        sx={{ ml: 2, bgcolor: '#673ab7', '&:hover': { bgcolor: '#5e35b1' } }}
+                        onClick={() => {
+                            navigator.clipboard.writeText(publicLink);
+                            alert('Link copied to clipboard!');
+                        }}
+                    >
+                        Send
+                    </Button>
+                    <IconButton sx={{ ml: 1 }}>
+                        <MoreVertIcon sx={{ color: '#5f6368' }} />
+                    </IconButton>
+                </Toolbar>
+                <Tabs
+                    value={tabValue}
+                    onChange={(e, v) => setTabValue(v)}
+                    centered
+                    textColor="primary"
+                    indicatorColor="primary"
+                    sx={{ '& .MuiTab-root': { textTransform: 'none', fontWeight: 500 } }}
+                >
+                    <Tab label="Questions" disabled />
+                    <Tab label="Responses" />
+                    <Tab label="Settings" disabled />
+                </Tabs>
+            </AppBar>
 
-                {/* Submissions Table */}
-                <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-                    <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-                        <h3 className="text-lg leading-6 font-medium text-gray-900">Submissions ({submissions.length})</h3>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Date
-                                    </th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Data
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {submissions.map((sub) => (
-                                    <tr key={sub._id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {new Date(sub.submittedAt).toLocaleString()}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-900">
-                                            <div className="grid grid-cols-1 gap-2">
-                                                {Object.entries(sub.content).map(([key, value]) => (
-                                                    <div key={key} className="flex flex-col">
-                                                        <span className="font-medium text-gray-700 capitalize">{key}:</span>
-                                                        {typeof value === 'string' && value.startsWith('http') && value.includes('cloudinary') ? (
-                                                            <img src={value} alt="Uploaded content" className="mt-1 h-24 w-auto object-cover rounded border" />
-                                                        ) : (
-                                                            <span className="text-gray-600">{String(value)}</span>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {submissions.length === 0 && (
-                                    <tr>
-                                        <td colSpan={2} className="px-6 py-4 text-center text-gray-500">
-                                            No submissions yet.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </main>
-        </div>
+            {/* Content */}
+            <Container maxWidth="md" sx={{ mt: 4, pb: 4 }}>
+                <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+                    <Typography variant="h4" sx={{ mb: 1 }}>{submissions.length} responses</Typography>
+                    <Typography variant="body2" color="text.secondary">Summary of all responses</Typography>
+                </Paper>
+
+                {submissions.length === 0 ? (
+                    <Paper sx={{ p: 6, textAlign: 'center', borderRadius: 2 }}>
+                        <Typography variant="body1" color="text.secondary">Waiting for responses...</Typography>
+                    </Paper>
+                ) : (
+                    <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                        <TableContainer>
+                            <Table>
+                                <TableHead sx={{ bgcolor: '#f8f9fa' }}>
+                                    <TableRow>
+                                        <TableCell>Timestamp</TableCell>
+                                        <TableCell>Response Data</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {submissions.map((sub) => (
+                                        <TableRow key={sub._id} hover>
+                                            <TableCell sx={{ verticalAlign: 'top', width: 180, color: '#5f6368' }}>
+                                                {new Date(sub.submittedAt).toLocaleString()}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Grid container spacing={2}>
+                                                    {Object.entries(sub.content).map(([key, value]) => (
+                                                        <Grid item xs={12} key={key}>
+                                                            <Typography variant="caption" display="block" color="text.secondary" sx={{ fontWeight: 500 }}>
+                                                                {key}
+                                                            </Typography>
+                                                            {typeof value === 'string' && value.startsWith('http') && value.includes('cloudinary') ? (
+                                                                <Box sx={{ mt: 1 }}>
+                                                                    <img src={value} alt="Uploaded" style={{ maxHeight: 100, borderRadius: 4, border: '1px solid #e0e0e0' }} />
+                                                                    <Button
+                                                                        size="small"
+                                                                        href={value}
+                                                                        target="_blank"
+                                                                        startIcon={<VisibilityIcon />}
+                                                                        sx={{ display: 'block', mt: 0.5, textTransform: 'none' }}
+                                                                    >
+                                                                        View
+                                                                    </Button>
+                                                                </Box>
+                                                            ) : (
+                                                                <Typography variant="body2" color="text.primary">
+                                                                    {String(value)}
+                                                                </Typography>
+                                                            )}
+                                                        </Grid>
+                                                    ))}
+                                                </Grid>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Paper>
+                )}
+            </Container>
+        </Box>
     );
 }

@@ -3,7 +3,21 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
-import { LogOut, Plus, Loader2 } from 'lucide-react';
+import {
+    AppBar, Toolbar, Typography, Button, Container, Grid, Card, CardContent,
+    TextField, IconButton, Fab, Tabs, Tab, Box, Paper, Menu, MenuItem,
+    CircularProgress, Divider
+} from '@mui/material';
+import {
+    Add as AddIcon,
+    Description as DescriptionIcon,
+    Image as ImageIcon,
+    TextFields as TextFieldsIcon,
+    MoreVert as MoreVertIcon,
+    Visibility as VisibilityIcon,
+    Send as SendIcon,
+    AccountCircle
+} from '@mui/icons-material';
 
 interface Form {
     _id: string;
@@ -20,6 +34,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [prompt, setPrompt] = useState('');
     const [generating, setGenerating] = useState(false);
+    const [tabValue, setTabValue] = useState(0);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -41,11 +56,6 @@ export default function Dashboard() {
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        router.push('/auth/login');
-    };
-
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!prompt.trim()) return;
@@ -62,99 +72,107 @@ export default function Dashboard() {
         }
     };
 
-    if (loading) return <div className="p-8 text-center">Loading dashboard...</div>;
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        router.push('/auth/login');
+    };
+
+    if (loading) return (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+            <CircularProgress />
+        </Box>
+    );
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <nav className="bg-white shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <h1 className="text-xl font-bold text-gray-900">AI Form Builder</h1>
-                        </div>
-                        <div className="flex items-center">
-                            <button
-                                onClick={handleLogout}
-                                className="flex items-center text-gray-600 hover:text-gray-900"
-                            >
-                                <LogOut className="h-5 w-5 mr-2" />
-                                Logout
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+        <Box sx={{ flexGrow: 1, bgcolor: '#f0ebf8', minHeight: '100vh' }}>
+            {/* Header */}
+            <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', color: 'text.primary', borderBottom: '1px solid #e0e0e0' }}>
+                <Toolbar>
+                    <DescriptionIcon sx={{ color: '#673ab7', mr: 2, fontSize: 40 }} />
+                    <Typography variant="h6" component="div" sx={{ flexGrow: 1, color: '#5f6368' }}>
+                        Forms
+                    </Typography>
 
-            <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                {/* Generator Section */}
-                <div className="bg-white p-6 rounded-lg shadow-sm mb-8">
-                    <h2 className="text-lg font-medium text-gray-900 mb-4">Create New Form</h2>
-                    <form onSubmit={handleGenerate} className="flex gap-4">
-                        <input
-                            type="text"
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <TextField
+                            placeholder="Search"
+                            variant="outlined"
+                            size="small"
+                            sx={{ bgcolor: '#f1f3f4', borderRadius: 2, '& fieldset': { border: 'none' }, width: 300, display: { xs: 'none', md: 'block' } }}
+                        />
+                        <IconButton onClick={handleLogout}>
+                            <AccountCircle fontSize="large" sx={{ color: '#5f6368' }} />
+                        </IconButton>
+                    </Box>
+                </Toolbar>
+            </AppBar>
+
+            {/* Generator Section (Custom Addition to replicate "Start a new form") */}
+            <Box sx={{ bgcolor: 'white', py: 3, mb: 4 }}>
+                <Container maxWidth="lg">
+                    <Typography variant="body1" sx={{ mb: 2, color: '#202124', fontWeight: 500 }}>
+                        Start a new form with AI
+                    </Typography>
+                    <Box component="form" onSubmit={handleGenerate} sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <TextField
+                            fullWidth
+                            placeholder="Describe your form (e.g. 'RSVP for a wedding')..."
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
-                            placeholder="Describe your form (e.g., 'A registration form for a coding workshop with name, email, and experience level')"
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             disabled={generating}
+                            sx={{ bgcolor: '#f8f9fa' }}
                         />
-                        <button
+                        <Button
+                            variant="contained"
                             type="submit"
                             disabled={generating}
-                            className="flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                            startIcon={generating ? <CircularProgress size={20} color="inherit" /> : <AddIcon />}
+                            sx={{ height: 56, px: 4, bgcolor: '#673ab7', '&:hover': { bgcolor: '#5e35b1' } }}
                         >
-                            {generating ? (
-                                <>
-                                    <Loader2 className="animate-spin h-5 w-5 mr-2" />
-                                    Generating...
-                                </>
-                            ) : (
-                                <>
-                                    <Plus className="h-5 w-5 mr-2" />
-                                    Generate
-                                </>
-                            )}
-                        </button>
-                    </form>
-                </div>
+                            Create
+                        </Button>
+                    </Box>
+                </Container>
+            </Box>
 
-                {/* Forms List */}
-                <div className="bg-white shadow overflow-hidden sm:rounded-md">
-                    <ul className="divide-y divide-gray-200">
-                        {forms.map((form) => (
-                            <li key={form._id}>
-                                <div className="px-4 py-4 sm:px-6 hover:bg-gray-50 transition cursor-pointer" onClick={() => router.push(`/dashboard/forms/${form._id}`)}>
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-sm font-medium text-blue-600 truncate">{form.title}</p>
-                                        <div className="ml-2 flex-shrink-0 flex">
-                                            <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                Active
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="mt-2 sm:flex sm:justify-between">
-                                        <div className="sm:flex">
-                                            <p className="flex items-center text-sm text-gray-500">
-                                                {form.content.description}
-                                            </p>
-                                        </div>
-                                        <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                                            <p>
-                                                Created on <time dateTime={form.createdAt}>{new Date(form.createdAt).toLocaleDateString()}</time>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                        ))}
-                        {forms.length === 0 && (
-                            <li className="px-4 py-8 text-center text-gray-500">
-                                No forms yet. Create one above!
-                            </li>
-                        )}
-                    </ul>
-                </div>
-            </main>
-        </div>
+            {/* Recent Forms */}
+            <Container maxWidth="lg">
+                <Typography variant="body1" sx={{ mb: 2, color: '#202124', fontWeight: 500 }}>
+                    Recent forms
+                </Typography>
+
+                <Grid container spacing={3}>
+                    {forms.map((form) => (
+                        <Grid item xs={12} sm={6} md={4} lg={3} key={form._id}>
+                            <Card
+                                sx={{
+                                    height: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    cursor: 'pointer',
+                                    '&:hover': { border: '1px solid #673ab7' }
+                                }}
+                                onClick={() => router.push(`/dashboard/forms/${form._id}`)}
+                            >
+                                <Box sx={{ height: 150, bgcolor: '#f0ebf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <DescriptionIcon sx={{ fontSize: 60, color: '#673ab7', opacity: 0.5 }} />
+                                </Box>
+                                <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+                                    <Typography gutterBottom variant="body1" component="div" sx={{ fontWeight: 500 }}>
+                                        {form.title}
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                                        <DescriptionIcon sx={{ fontSize: 16, color: '#673ab7', mr: 1 }} />
+                                        <Typography variant="caption" color="text.secondary">
+                                            Opened {new Date(form.createdAt).toLocaleDateString()}
+                                        </Typography>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+            </Container>
+        </Box>
     );
 }
