@@ -46,11 +46,13 @@ export const generateFormSchema = async (prompt: string, context: string = ''): 
     }
   `;
 
-  let fullPrompt = `${systemPrompt}\n\nUser Request: ${prompt}`;
+  let fullPrompt = systemPrompt;
 
   if (context) {
-    fullPrompt += `\n\nRelevant Past Forms (Context):\n${context}\n\nUse the structure and style of these past forms if relevant, but prioritize the new request.`;
+    fullPrompt += `\n\nRelevant Past Forms (Context):\n${context}\n\nUse the structure and style of these past forms if relevant.`;
   }
+
+  fullPrompt += `\n\nUser Request: ${prompt}`;
 
   try {
     const result = await model.generateContent(fullPrompt);
