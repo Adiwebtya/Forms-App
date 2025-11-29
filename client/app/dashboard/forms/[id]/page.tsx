@@ -73,7 +73,13 @@ export default function FormDetailsPage() {
 
     if (!form) return <Typography>Form not found</Typography>;
 
-    const publicLink = `http://localhost:3000/form/${form._id}`;
+    const [origin, setOrigin] = useState('');
+
+    useEffect(() => {
+        setOrigin(window.location.origin);
+    }, []);
+
+    const publicLink = `${origin}/form/${form._id}`;
 
     return (
         <Box sx={{ bgcolor: '#f0ebf8', minHeight: '100vh' }}>

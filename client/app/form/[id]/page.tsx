@@ -43,7 +43,7 @@ export default function PublicFormPage() {
             const formData = new FormData();
             formData.append('file', file);
             try {
-                const res = await axios.post('http://localhost:5000/api/upload', formData, {
+                const res = await axios.post('https://forms-app-sbtq.onrender.com/api/upload', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 setValue(fieldName, res.data.url);
@@ -63,7 +63,7 @@ export default function PublicFormPage() {
 
     const fetchForm = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/forms/${id}`);
+            const res = await axios.get(`https://forms-app-sbtq.onrender.com/api/forms/${id}`);
             setFormSchema(res.data.content);
         } catch (err) {
             setError('Failed to load form. It may not exist.');
@@ -74,7 +74,7 @@ export default function PublicFormPage() {
 
     const onSubmit = async (data: any) => {
         try {
-            await axios.post(`http://localhost:5000/api/forms/${id}/submit`, data);
+            await axios.post(`https://forms-app-sbtq.onrender.com/api/forms/${id}/submit`, data);
             setSubmitted(true);
         } catch (err) {
             alert('Failed to submit form');
